@@ -2,7 +2,7 @@
 
 import 'package:get_storage/get_storage.dart';
 
-import '../../features/login/login_view.dart';
+import '../../features/login/presentation/login_view.dart';
 import '../router/router.dart';
 import 'user_model.dart';
 

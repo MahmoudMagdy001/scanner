@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../common_component/custom_text_field.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import 'component/saved_data_card.dart';
-import 'presentation/cubit/saved_data_cubit.dart';
-import 'presentation/cubit/saved_data_state.dart';
+import '../../../core/widgets/custom_text_field.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../component/saved_data_card.dart';
+import 'cubit/saved_data_cubit.dart';
+import 'cubit/saved_data_state.dart';
 
 class SavedDataView extends StatelessWidget {
   const SavedDataView({super.key});

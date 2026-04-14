@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../../../common_component/custom_button.dart';
-import '../../../../common_component/custom_text_field.dart';
-import '../../../../common_component/snack_bar.dart';
-import '../../../../theme/app_colors.dart';
-import '../../../../theme/app_text_styles.dart';
-import '../../qr_camera_page.dart';
+import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/snack_bar.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import 'qr_camera_page.dart';
 import '../cubit/extract_image_cubit.dart';
 import '../cubit/extract_image_state.dart';
 

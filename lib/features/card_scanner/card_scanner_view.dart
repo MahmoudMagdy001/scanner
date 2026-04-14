@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../core/dioHelper/dio_helper.dart';
 import '../../core/router/router.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../card_type/card_type_view.dart';
-import '../saved_data/saved_data_view.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../card_type/presentation/card_type_view.dart';
+import '../saved_data/presentation/saved_data_view.dart';
 
 class CardScannerView extends StatelessWidget {
   const CardScannerView({super.key});

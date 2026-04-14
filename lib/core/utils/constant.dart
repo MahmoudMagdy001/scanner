@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'theme/app_colors.dart' as theme;
+import '../theme/app_colors.dart' as theme;
 
 /// ─── Legacy Bridge ───
 /// This file maintains aliases to the new design system in lib/theme/

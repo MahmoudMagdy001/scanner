@@ -8,10 +8,10 @@ import 'core/appStorage/app_storage.dart';
 import 'core/dioHelper/dio_helper.dart';
 import 'core/router/router.dart';
 import 'features/app_disabled_view.dart';
-import 'features/settings/settings_view.dart';
+import 'features/settings/presentation/settings_view.dart';
 import 'firebase_options.dart';
-import 'injection_container.dart';
-import 'theme/app_theme.dart';
+import 'core/di/injection_container.dart';
+import 'core/theme/app_theme.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../core/router/router.dart';
+import '../router/router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 

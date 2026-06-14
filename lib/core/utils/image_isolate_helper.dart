@@ -57,7 +57,7 @@ class ImageIsolateHelper {
       if (decodedImage == null) return null;
 
       final resized = img.copyResize(decodedImage, width: params.targetWidth);
-      final compressedBytes = img.encodeJpg(resized);
+      final compressedBytes = img.encodeJpg(resized, quality: 90);
       final tempPath =
           '${imageFile.parent.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final tempFile = File(tempPath);
@@ -104,8 +104,12 @@ class ImageIsolateHelper {
       final pinBaseImage = _buildBaseCrop(sourceImage, pinCropBox);
       final serialBaseImage = _buildBaseCrop(sourceImage, serialCropBox);
 
-      File(pinBasePath).writeAsBytesSync(img.encodeJpg(pinBaseImage));
-      File(serialBasePath).writeAsBytesSync(img.encodeJpg(serialBaseImage));
+      File(
+        pinBasePath,
+      ).writeAsBytesSync(img.encodeJpg(pinBaseImage, quality: 90));
+      File(
+        serialBasePath,
+      ).writeAsBytesSync(img.encodeJpg(serialBaseImage, quality: 90));
 
       final pinVariantPaths = _createVariants(
         baseImage: pinBaseImage,
@@ -155,15 +159,30 @@ class ImageIsolateHelper {
   }) {
     final variants = <img.Image>[
       _prepareVariant(baseImage, contrast: 1.7, brightness: 1.05),
-      _prepareVariant(baseImage, contrast: 2.1, brightness: 1.12, threshold: 145),
-      _prepareVariant(baseImage, contrast: 2.4, brightness: 1.18, threshold: 120),
-      _prepareVariant(baseImage, contrast: 1.9, brightness: 1.08, threshold: 165),
+      _prepareVariant(
+        baseImage,
+        contrast: 2.1,
+        brightness: 1.12,
+        threshold: 145,
+      ),
+      _prepareVariant(
+        baseImage,
+        contrast: 2.4,
+        brightness: 1.18,
+        threshold: 120,
+      ),
+      _prepareVariant(
+        baseImage,
+        contrast: 1.9,
+        brightness: 1.08,
+        threshold: 165,
+      ),
     ];
 
     final paths = <String>[];
     for (var i = 0; i < variants.length; i++) {
       final path = '$parentPath/${prefix}_$i.jpg';
-      File(path).writeAsBytesSync(img.encodeJpg(variants[i]));
+      File(path).writeAsBytesSync(img.encodeJpg(variants[i], quality: 90));
       paths.add(path);
     }
     return paths;
@@ -269,7 +288,10 @@ class ScanCropBox {
 }
 
 class _CompressionParams {
-  const _CompressionParams({required this.imagePath, required this.targetWidth});
+  const _CompressionParams({
+    required this.imagePath,
+    required this.targetWidth,
+  });
 
   final String imagePath;
   final int targetWidth;

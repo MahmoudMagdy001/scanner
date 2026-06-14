@@ -63,7 +63,7 @@ class _QrCameraPageState extends State<QrCameraPage> {
 
       final controller = CameraController(
         camera,
-        ResolutionPreset.max,
+        ResolutionPreset.ultraHigh,
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.jpeg,
       );
@@ -222,8 +222,9 @@ class _QrCameraPageState extends State<QrCameraPage> {
                             as RenderBox?;
                     if (box == null) return;
 
-                    final localOffset =
-                        box.globalToLocal(details.globalPosition);
+                    final localOffset = box.globalToLocal(
+                      details.globalPosition,
+                    );
                     final focusPoint = Offset(
                       (localOffset.dx / box.size.width).clamp(0.0, 1.0),
                       (localOffset.dy / box.size.height).clamp(0.0, 1.0),

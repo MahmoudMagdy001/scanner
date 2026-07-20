@@ -39,9 +39,7 @@ class CardTypeView extends StatelessWidget {
         selector: (state) => state is CardTypeLoading,
         builder: (context, isLoading) {
           if (isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: colorPrimary),
-            );
+            return const Center(child: CircularProgressIndicator(color: colorPrimary));
           }
           return BlocSelector<CardTypeBloc, CardTypeState, int>(
             selector: (state) => context.read<CardTypeBloc>().categories.length,
@@ -50,8 +48,7 @@ class CardTypeView extends StatelessWidget {
               if (categoriesCount == 0) {
                 return const _EmptyState(
                   icon: Icons.dashboard_outlined,
-                  message:
-                      'No card types available.\nPlease check your server connection.',
+                  message: 'No card types available.\nPlease check your server connection.',
                 );
               }
               return SafeArea(
@@ -60,29 +57,22 @@ class CardTypeView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Available Types',
-                        style: AppTextStyles.titleSmall.copyWith(
-                          color: colorTextSecondary,
-                        ),
-                      ),
+                      Text('Available Types', style: AppTextStyles.titleSmall.copyWith(color: colorTextSecondary)),
                       const SizedBox(height: 14),
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 7,
-                              mainAxisSpacing: 7,
-                              childAspectRatio: 1.3,
-                            ),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 7,
+                          mainAxisSpacing: 7,
+                          childAspectRatio: 1.3,
+                        ),
                         itemCount: categoriesCount,
                         itemBuilder: (context, index) {
                           final categories = bloc.categories;
                           final item = categories[index];
-                          final fallbackImage =
-                              _fallbackImages[index % _fallbackImages.length];
+                          final fallbackImage = _fallbackImages[index % _fallbackImages.length];
 
                           return _CategoryCard(
                             fallbackImage: fallbackImage,
@@ -90,12 +80,8 @@ class CardTypeView extends StatelessWidget {
                             onTap: () async {
                               await MagicRouter.navigateTo(
                                 BlocProvider(
-                                  create: (context) => GetIt.I<ExtractImageBloc>()
-                                    ..add(const LoadHistoryCountEvent()),
-                                  child: ExtractImagePage(
-                                    scanType: item.name ?? '',
-                                    categoryId: item.id!,
-                                  ),
+                                  create: (context) => GetIt.I<ExtractImageBloc>()..add(const LoadHistoryCountEvent()),
+                                  child: ExtractImagePage(scanType: item.name ?? '', categoryId: item.id!),
                                 ),
                               );
                             },
@@ -115,11 +101,7 @@ class CardTypeView extends StatelessWidget {
 }
 
 class _CategoryCard extends StatelessWidget {
-  const _CategoryCard({
-    required this.fallbackImage,
-    required this.label,
-    required this.onTap,
-  });
+  const _CategoryCard({required this.fallbackImage, required this.label, required this.onTap});
 
   final String fallbackImage;
   final String label;
@@ -132,30 +114,21 @@ class _CategoryCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: colorBorder, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: colorPrimary.withAlpha(12),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: colorPrimary.withAlpha(12), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(fallbackImage, fit: BoxFit.cover),
+            Image.asset(fallbackImage, fit: BoxFit.fill),
             // Gradient overlay for label
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,
@@ -165,10 +138,7 @@ class _CategoryCard extends StatelessWidget {
                 ),
                 child: Text(
                   label,
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: AppTextStyles.labelMedium.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -194,18 +164,11 @@ class _EmptyState extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: colorPrimary.withAlpha(12),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: colorPrimary.withAlpha(12), shape: BoxShape.circle),
             child: Icon(icon, size: 48, color: colorTextSecondary),
           ),
           const SizedBox(height: 20),
-          Text(
-            message,
-            style: AppTextStyles.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
+          Text(message, style: AppTextStyles.bodyMedium, textAlign: TextAlign.center),
         ],
       ),
     ),

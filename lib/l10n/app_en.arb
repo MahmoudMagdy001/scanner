@@ -19,5 +19,12 @@
   "availableTypes": "Available Types",
   "noCardTypesAvailable": "No card types available.\nPlease check your server connection.",
   "errorConnecting": "Error connecting to server.",
-  "noInternet": "No internet connection available."
+  "noInternet": "No internet connection available.",
+  "serviceUnavailable": "Service Unavailable",
+  "appDisabledMessage": "The application is currently disabled.\nPlease contact the administrator or developer to activate the service.",
+  "contactSupport": "Contact Support",
+  "supportDetails": "Support Details",
+  "supportEmail": "Support Email",
+  "supportPhone": "Support Phone",
+  "close": "Close"
 }

@@ -69,4 +69,26 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noInternet => 'لا يوجد اتصال بالإنترنت.';
+
+  @override
+  String get serviceUnavailable => 'الخدمة غير متوفرة';
+
+  @override
+  String get appDisabledMessage =>
+      'التطبيق معطل حالياً.\nيرجى التواصل مع مسؤول النظام أو المطور لتفعيل الخدمة.';
+
+  @override
+  String get contactSupport => 'الاتصال بالدعم';
+
+  @override
+  String get supportDetails => 'تفاصيل الدعم';
+
+  @override
+  String get supportEmail => 'البريد الإلكتروني للدعم';
+
+  @override
+  String get supportPhone => 'هاتف الدعم';
+
+  @override
+  String get close => 'إغلاق';
 }

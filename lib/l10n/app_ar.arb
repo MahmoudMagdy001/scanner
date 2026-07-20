@@ -19,5 +19,12 @@
   "availableTypes": "الأنواع المتاحة",
   "noCardTypesAvailable": "لا توجد أنواع بطاقات متاحة.\nيرجى التحقق من اتصالك بالخادم.",
   "errorConnecting": "خطأ في الاتصال بالخادم.",
-  "noInternet": "لا يوجد اتصال بالإنترنت."
+  "noInternet": "لا يوجد اتصال بالإنترنت.",
+  "serviceUnavailable": "الخدمة غير متوفرة",
+  "appDisabledMessage": "التطبيق معطل حالياً.\nيرجى التواصل مع مسؤول النظام أو المطور لتفعيل الخدمة.",
+  "contactSupport": "الاتصال بالدعم",
+  "supportDetails": "تفاصيل الدعم",
+  "supportEmail": "البريد الإلكتروني للدعم",
+  "supportPhone": "هاتف الدعم",
+  "close": "إغلاق"
 }

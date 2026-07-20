@@ -217,6 +217,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No internet connection available.'**
   String get noInternet;
+
+  /// No description provided for @serviceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Unavailable'**
+  String get serviceUnavailable;
+
+  /// No description provided for @appDisabledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The application is currently disabled.\nPlease contact the administrator or developer to activate the service.'**
+  String get appDisabledMessage;
+
+  /// No description provided for @contactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Support'**
+  String get contactSupport;
+
+  /// No description provided for @supportDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Support Details'**
+  String get supportDetails;
+
+  /// No description provided for @supportEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Support Email'**
+  String get supportEmail;
+
+  /// No description provided for @supportPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Support Phone'**
+  String get supportPhone;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
 }
 
 class _AppLocalizationsDelegate

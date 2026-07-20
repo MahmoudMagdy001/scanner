@@ -69,4 +69,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noInternet => 'No internet connection available.';
+
+  @override
+  String get serviceUnavailable => 'Service Unavailable';
+
+  @override
+  String get appDisabledMessage =>
+      'The application is currently disabled.\nPlease contact the administrator or developer to activate the service.';
+
+  @override
+  String get contactSupport => 'Contact Support';
+
+  @override
+  String get supportDetails => 'Support Details';
+
+  @override
+  String get supportEmail => 'Support Email';
+
+  @override
+  String get supportPhone => 'Support Phone';
+
+  @override
+  String get close => 'Close';
 }

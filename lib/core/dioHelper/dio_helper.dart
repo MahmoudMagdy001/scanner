@@ -4,59 +4,69 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:qrscanner/core/appStorage/app_storage.dart';
 
 class DioHelper {
   static const _defaultBaseUrl = 'https://bestscan.store/api/v1/';
 
-  static final Dio dioSingleton =
-      Dio(
-          BaseOptions(
-            baseUrl: _defaultBaseUrl,
-            connectTimeout: const Duration(seconds: 20),
-            receiveTimeout: const Duration(seconds: 20),
-            followRedirects: false,
-            validateStatus: (status) => status != null && status < 500,
-            headers: {'Accept': 'application/json', 'Accept-Language': 'en'},
-          ),
-        )
-        ..interceptors.add(
-          // ponytail: log full requests and responses without truncation
-          InterceptorsWrapper(
-            onRequest: (options, handler) {
-              final body = options.data;
-              final bodyStr = body is FormData ? 'FormData' : (body != null ? jsonEncode(body) : 'Empty');
-              developer.log(
-                '--> ${options.method} ${options.uri}\nHeaders: ${options.headers}\nBody: $bodyStr',
-                name: 'API_REQUEST',
-              );
-              return handler.next(options);
-            },
-            onResponse: (response, handler) {
-              String prettyJson;
-              try {
-                prettyJson = const JsonEncoder.withIndent('  ').convert(response.data);
-              } on Object catch (_) {
-                prettyJson = response.data.toString();
-              }
-              developer.log(
-                '<-- ${response.statusCode} ${response.requestOptions.uri}\nResponse Body:\n$prettyJson',
-                name: 'API_RESPONSE',
-              );
-              return handler.next(response);
-            },
-            onError: (err, handler) {
-              String prettyJson;
-              try {
-                prettyJson = const JsonEncoder.withIndent('  ').convert(err.response?.data);
-              } on Object catch (_) {
-                prettyJson = err.response?.data.toString() ?? 'No details';
-              }
-              developer.log('<-- Error: ${err.message}\nResponse Body:\n$prettyJson', name: 'API_ERROR');
-              return handler.next(err);
-            },
-          ),
-        );
+  // ponytail: logging interceptor is disabled in release builds (kDebugMode check)
+  // to avoid costly JSON encoding and developer.log overhead in production.
+  static final Dio dioSingleton = _createDioSingleton();
+
+  static Dio _createDioSingleton() {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: _defaultBaseUrl,
+        connectTimeout: const Duration(seconds: 20),
+        receiveTimeout: const Duration(seconds: 20),
+        followRedirects: false,
+        validateStatus: (status) => status != null && status < 500,
+        headers: {'Accept': 'application/json', 'Accept-Language': 'en'},
+      ),
+    );
+
+    if (kDebugMode) {
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            final body = options.data;
+            final bodyStr = body is FormData ? 'FormData' : (body != null ? jsonEncode(body) : 'Empty');
+            developer.log(
+              '--> ${options.method} ${options.uri}\nHeaders: ${options.headers}\nBody: $bodyStr',
+              name: 'API_REQUEST',
+            );
+            return handler.next(options);
+          },
+          onResponse: (response, handler) {
+            String prettyJson;
+            try {
+              prettyJson = const JsonEncoder.withIndent('  ').convert(response.data);
+            } on Object catch (_) {
+              prettyJson = response.data.toString();
+            }
+            developer.log(
+              '<-- ${response.statusCode} ${response.requestOptions.uri}\nResponse Body:\n$prettyJson',
+              name: 'API_RESPONSE',
+            );
+            return handler.next(response);
+          },
+          onError: (err, handler) {
+            String prettyJson;
+            try {
+              prettyJson = const JsonEncoder.withIndent('  ').convert(err.response?.data);
+            } on Object catch (_) {
+              prettyJson = err.response?.data.toString() ?? 'No details';
+            }
+            developer.log('<-- Error: ${err.message}\nResponse Body:\n$prettyJson', name: 'API_ERROR');
+            return handler.next(err);
+          },
+        ),
+      );
+    }
+
+    return dio;
+  }
 
   // Update base URL dynamically
   static void updateBaseUrl(String baseUrl) {

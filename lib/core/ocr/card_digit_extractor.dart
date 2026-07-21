@@ -90,26 +90,22 @@ class CardDigitExtractor {
   String? cleanPinCandidate(String digits) => digits.length == 14 ? digits : null;
 
   String? cleanSerialCandidate(String digits) {
-    // Serial is always 12 digits, typically starting with '103' or '60000'.
+    // Serial is always 12 digits, typically starting with '103' or '600' (Zain).
     if (digits.length == 12) return digits;
 
     // Handle common OCR noise cases (e.g. an extra leading/trailing digit).
     if (digits.length == 13) {
-      if (digits.startsWith('1103') || digits.startsWith('160000')) {
-        return digits.substring(1);
-      }
-      if (digits.endsWith('1') && (digits.startsWith('60000') || digits.startsWith('103'))) {
+      if (digits.startsWith('600') || digits.startsWith('103')) {
         return digits.substring(0, 12);
       }
-      if (digits.startsWith('1') &&
-          (digits.substring(1).startsWith('103') || digits.substring(1).startsWith('60000'))) {
+      if (digits.substring(1).startsWith('600') || digits.substring(1).startsWith('103')) {
         return digits.substring(1);
       }
     }
 
-    if (digits.length == 14 && digits.startsWith('1') && digits.endsWith('1')) {
+    if (digits.length == 14) {
       final middle = digits.substring(1, 13);
-      if (middle.startsWith('103') || middle.startsWith('60000')) {
+      if (middle.startsWith('600') || middle.startsWith('103')) {
         return middle;
       }
     }

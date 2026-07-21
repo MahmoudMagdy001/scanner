@@ -2,16 +2,26 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:path/path.dart' as p;
 import 'package:qrscanner/core/ocr/card_digit_extractor.dart';
 import 'package:qrscanner/core/ocr/ocr_logger.dart';
 
+// ponytail: HTTP/2 evaluation: Standard Dart HttpClientAdapter automatically reuses TCP/TLS connections with Keep-Alive
+// for serial requests. dio_http2_adapter can be added if parallel requests are introduced in the future.
+
 /// Mistral OCR engine connecting to the Mistral AI OCR API.
 class MistralOcrEngine {
+  /// Shared Dio instance across requests to keep TCP/TLS connections alive.
+  static final Dio _sharedDio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+    ),
+  );
+
   MistralOcrEngine({Dio? dio, CardDigitExtractor? extractor})
-    : _dio =
-          dio ??
-          Dio(BaseOptions(connectTimeout: const Duration(seconds: 30), receiveTimeout: const Duration(seconds: 30))),
+    : _dio = dio ?? _sharedDio,
       _extractor = extractor ?? const CardDigitExtractor();
 
   final Dio _dio;
@@ -28,6 +38,16 @@ class MistralOcrEngine {
     } on Object {
       return false;
     }
+  }
+
+  bool _isTransientError(DioException e) {
+    // Only retry connection/timeout errors, not API response status codes (e.g. 400/401)
+    if (e.response != null) return false;
+    return e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.connectionError ||
+        (e.type == DioExceptionType.unknown && e.error is SocketException);
   }
 
   Future<void> dispose() async {}
@@ -49,7 +69,8 @@ class MistralOcrEngine {
         name: 'OCR_ENGINE',
       );
 
-      final base64Str = base64Encode(bytes);
+      // Move base64 encoding off the main isolate to keep UI responsive
+      final base64Str = await compute(base64Encode, bytes);
       logOcr(
         '[2/6] ✅ Base64 encoded (${(base64Str.length / 1024).toStringAsFixed(1)} KB) — ${sw.elapsedMilliseconds}ms',
         name: 'OCR_ENGINE',
@@ -60,15 +81,60 @@ class MistralOcrEngine {
       final dataUrl = 'data:$mimeType;base64,$base64Str';
 
       logOcr('[3/6] 🚀 Uploading to Mistral API...', name: 'OCR_ENGINE');
-      final response = await _dio.post<Map<String, dynamic>>(
-        _ocrEndpoint,
-        data: {
-          'model': 'mistral-ocr-latest',
-          'document': {'type': 'image_url', 'image_url': dataUrl},
-        },
-        options: Options(headers: {'Authorization': 'Bearer $_mistralApiKey', 'Content-Type': 'application/json'}),
-      );
-      logOcr('[4/6] ✅ API response received — ${sw.elapsedMilliseconds}ms', name: 'OCR_ENGINE');
+
+      Response<Map<String, dynamic>>? response;
+      var attempt = 0;
+      const maxRetries = 2;
+      const backoffs = [Duration(milliseconds: 500), Duration(milliseconds: 1500)];
+
+      while (true) {
+        try {
+          final swApi = Stopwatch()..start();
+          int? uploadMs;
+
+          response = await _dio.post<Map<String, dynamic>>(
+            _ocrEndpoint,
+            data: {
+              'model': 'mistral-ocr-latest',
+              'document': {'type': 'image_url', 'image_url': dataUrl},
+              // Disable base64 page images in response to shrink payload size
+              'include_image_base64': false,
+            },
+            options: Options(
+              headers: {'Authorization': 'Bearer $_mistralApiKey', 'Content-Type': 'application/json'},
+            ),
+            onSendProgress: (sent, total) {
+              if (total > 0 && sent == total && uploadMs == null) {
+                uploadMs = swApi.elapsedMilliseconds;
+                logOcr(
+                  '  [network] ⬆️ Upload finished (${(total / 1024).toStringAsFixed(1)} KB) in ${uploadMs}ms. Waiting for server inference...',
+                  name: 'OCR_ENGINE',
+                );
+              }
+            },
+          );
+
+          final totalApiMs = swApi.elapsedMilliseconds;
+          final inferenceMs = uploadMs != null ? totalApiMs - uploadMs! : null;
+          logOcr(
+            '[4/6] ✅ API response received — upload: ${uploadMs ?? "N/A"}ms | server inference: ${inferenceMs ?? "N/A"}ms | total API: ${totalApiMs}ms',
+            name: 'OCR_ENGINE',
+          );
+          break;
+        } on DioException catch (e) {
+          if (_isTransientError(e) && attempt < maxRetries) {
+            final delay = backoffs[attempt];
+            attempt++;
+            logOcr(
+              '⚠️ Transient network error (${e.type.name}). Retrying attempt $attempt/$maxRetries in ${delay.inMilliseconds}ms...',
+              name: 'OCR_ENGINE',
+            );
+            await Future<void>.delayed(delay);
+            continue;
+          }
+          rethrow;
+        }
+      }
 
       final data = response.data;
       if (data == null) {
@@ -132,6 +198,6 @@ class MistralOcrEngine {
 class OcrEngineFactory {
   OcrEngineFactory._();
 
-  /// PIN: MistralOCR.
+  /// PIN: MistralOCR. Reuses shared Dio instance across requests.
   static MistralOcrEngine createPinEngine() => MistralOcrEngine();
 }

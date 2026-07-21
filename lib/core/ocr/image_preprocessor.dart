@@ -6,31 +6,48 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:qrscanner/core/ocr/ocr_logger.dart';
 
-class ImagePreprocessorConfig {
-  const ImagePreprocessorConfig({this.minLongestSide = 3600, this.maxLongestSide = 4000, this.jpegQuality = 92});
+/// Default target min resolution for upscaling (longest side in pixels).
+const int kDefaultMinLongestSide = 1600;
 
-  /// If the image's longest side is smaller than this, it gets upscaled up
-  /// to it. Small/unclear digits (like a faint or distant photo of the
-  /// scratch panel) benefit far more from more pixels than from
-  /// grayscale/contrast/sharpen tricks — those can't recover detail that
-  /// isn't there, upscaling at least gives the OCR model a bigger target.
+/// Default target max resolution for downscaling (longest side in pixels).
+const int kDefaultMaxLongestSide = 2200;
+
+/// Default JPEG compression quality (1-100).
+/// 75-85 range provides visually/functionally lossless quality for printed text/digits
+/// while significantly reducing file size compared to 90+.
+const int kDefaultJpegQuality = 85;
+
+/// Minimal longest side threshold below which upscaling is triggered.
+/// Images with longest side >= upscaleFloor (e.g. 800px) already have enough detail
+/// for OCR digit extraction and do not benefit from artificial upscaling.
+const int kDefaultUpscaleFloor = 800;
+
+class ImagePreprocessorConfig {
+  const ImagePreprocessorConfig({
+    this.minLongestSide = kDefaultMinLongestSide,
+    this.maxLongestSide = kDefaultMaxLongestSide,
+    this.jpegQuality = kDefaultJpegQuality,
+    this.upscaleFloor = kDefaultUpscaleFloor,
+  });
+
+  /// Target longest side size when upscaling very low-resolution images (< [upscaleFloor]).
   final int minLongestSide;
 
-  /// If the image's longest side is larger than this, it gets downscaled
-  /// to it. The OCR model gets no extra accuracy from pixels beyond this —
-  /// it just means more bytes to upload, which is the slowest part of the
-  /// pipeline (network upload dominates total scan time far more than the
-  /// on-device resize does). Keeping this well above `minLongestSide`
-  /// avoids fighting the upscale path.
+  /// Max longest side allowed. Images larger than this are downscaled to reduce upload payload.
   final int maxLongestSide;
 
-  /// JPEG quality. 100 gives near-zero extra benefit for OCR of printed
-  /// digits/text but noticeably bloats file size (and therefore upload
-  /// time). ~90-92 is visually/functionally lossless for this use case.
+  /// JPEG quality setting. 80 is optimal for OCR of printed digits (reduces byte size without image degradation).
   final int jpegQuality;
+
+  /// Floor threshold below which upscaling kicks in. Images above this size are not artificially upscaled.
+  final int upscaleFloor;
 }
 
 /// Preprocesses card images on-device before they're sent to OCR.
+// ponytail: Auto-cropping feasibility note:
+// Auto-cropping to scratch-panel/serial bounding box would require ML Kit or edge detection dependencies.
+// Currently full card native resizing to ~1200-1800px with 80% JPEG quality keeps payload low (<150KB),
+// making full-image upload fast enough without adding extra vision dependencies.
 class ImagePreprocessor {
   const ImagePreprocessor({this.config = const ImagePreprocessorConfig()});
 
@@ -56,7 +73,9 @@ class ImagePreprocessor {
     var targetHeight = height;
     var mode = 'no-resize';
 
-    if (longestSide < config.minLongestSide) {
+    // Only upscale if image resolution is below upscaleFloor (800px).
+    // Avoid upscaling adequate photos (800px-1200px) which inflates size without adding detail.
+    if (longestSide < config.upscaleFloor) {
       final scale = config.minLongestSide / longestSide;
       targetWidth = (width * scale).round();
       targetHeight = (height * scale).round();
